@@ -1,6 +1,11 @@
+<<<<<<< HEAD:ethers-providers/tests/ws_errors.rs
 #![cfg(not(feature = "celo"))]
 
 use ethers_providers::{Middleware, Provider, StreamExt, Ws};
+=======
+use ethers_core::types::Filter;
+use ethers_providers::{Middleware, Provider, StreamExt};
+>>>>>>> 73636a90 (RRR: Reconnection & Request Reissuance (#2181)):ethers-providers/tests/it/ws_errors.rs
 use futures_util::SinkExt;
 use std::time::Duration;
 use tokio::net::{TcpListener, TcpStream};
@@ -16,6 +21,7 @@ use tungstenite::protocol::Message;
 
 const WS_ENDPOINT: &str = "127.0.0.1:9002";
 
+<<<<<<< HEAD:ethers-providers/tests/ws_errors.rs
 use ethers_core::types::Filter;
 use tokio_tungstenite::connect_async;
 
@@ -33,6 +39,8 @@ async fn graceful_disconnect_on_ws_errors() {
     assert!(stream.next().await.is_none());
 }
 
+=======
+>>>>>>> 73636a90 (RRR: Reconnection & Request Reissuance (#2181)):ethers-providers/tests/it/ws_errors.rs
 async fn spawn_ws_server() {
     let listener = TcpListener::bind(&WS_ENDPOINT).await.expect("Can't listen");
     tokio::spawn(async move {
@@ -47,7 +55,7 @@ async fn handle_conn(stream: TcpStream) -> Result<(), Error> {
 
     while ws_stream.next().await.is_some() {
         let res: String =
-            "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0xcd0c3e8af590364c09d0fa6a1210faf5\"}"
+            "{\"jsonrpc\":\"2.0\",\"id\":0,\"result\":\"0xcd0c3e8af590364c09d0fa6a1210faf5\"}"
                 .into();
 
         // Answer with a valid RPC response to keep the connection alive
@@ -67,4 +75,18 @@ async fn handle_conn(stream: TcpStream) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+#[tokio::test]
+async fn graceful_disconnect_on_ws_errors() {
+    // Spawn a fake Ws server that will drop our connection after a while
+    spawn_ws_server().await;
+
+    // Connect to the fake server
+    let provider =
+        Provider::connect_with_reconnects(format!("ws://{WS_ENDPOINT}"), 1).await.unwrap();
+    let filter = Filter::new().event("Transfer(address,address,uint256)");
+    let mut stream = provider.subscribe_logs(&filter).await.unwrap();
+
+    assert!(stream.next().await.is_none());
 }

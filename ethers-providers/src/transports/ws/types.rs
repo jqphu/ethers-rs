@@ -237,6 +237,7 @@ impl ActiveSub {
 }
 
 /// Instructions for the `WsServer`.
+#[derive(Debug)]
 pub enum Instruction {
     /// JSON-RPC request
     Request { method: String, params: Box<RawValue>, sender: oneshot::Sender<Response> },

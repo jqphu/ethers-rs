@@ -47,7 +47,6 @@ impl WsClient {
         Ok(this)
     }
 
-    #[tracing::instrument(skip(self, params), err)]
     async fn make_request<R>(&self, method: &str, params: Box<RawValue>) -> Result<R, WsClientError>
     where
         R: DeserializeOwned,
